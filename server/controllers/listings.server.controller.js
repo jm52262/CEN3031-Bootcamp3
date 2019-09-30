@@ -58,7 +58,8 @@ exports.update = function(req, res) {
   var listing = req.listing;
 
   /* Replace the listings's properties with the new properties found in req.body */
- 
+  
+
   /*save the coordinates (located in req.results if there is an address property) */
  
   /* Save the listing */
@@ -70,12 +71,21 @@ exports.delete = function(req, res) {
   var listing = req.listing;
 
   /* Add your code to remove the listins */
+  Listing.remove(listing);
 
 };
 
 /* Retreive all the directory listings, sorted alphabetically by listing code */
 exports.list = function(req, res) {
   /* Add your code */
+  Listing.find().exec(function(err, listing) {
+    if(err) {
+      res.status(400).send(err);
+    } else {
+      req.listing = listing;
+      next();
+    }
+  });
 };
 
 /* 
