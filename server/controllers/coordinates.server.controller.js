@@ -10,17 +10,24 @@ module.exports = function(req, res, next) {
       var addressTemp2 = addressTemp.toLowerCase();
       var addressTemp3 = addressTemp2.replace(/\s/g, "%20");
       var addressTemp4 = addressTemp3.replace(/,/g , "%2C");
-      
+
     //Setup your options q and key are provided. Feel free to add others to make the JSON response less verbose and easier to read 
     var options = { 
       q: addressTemp4,
       key: config.openCage.key,  
-    }
+    };
 
+      var request_url = 'https://api.opencagedata.com/geocode/v1/json'
+          + '?'
+          + 'key=' + config.openCage.key
+          + '&q=' + addressTemp
+          + '&pretty=1'
+          + '&no_annotations=1';
+
+      console.log(request_url);
     //Setup your request using URL and options - see ? for format
     request({
-      url: 'https://api.opencagedata.com/geocode/v1/json', 
-      qs: options
+      url: request_url
       }, function(error, response, body) {
         //For ideas about response and error processing see https://opencagedata.com/tutorials/geocode-in-nodejs
         if(error){
@@ -28,9 +35,9 @@ module.exports = function(req, res, next) {
         }
 
         //JSON.parse to get contents. Remember to look at the response's JSON format in open cage data
-        let JSONResponse = JSON.parse(response);
+        let JSONResponse = JSON.parse(response.body);
 
-
+        //console.log(JSONResponse);
         /*Save the coordinates in req.results -> 
           this information will be accessed by listings.server.model.js 
           to add the coordinates to the listing request to be saved to the database.
@@ -38,10 +45,10 @@ module.exports = function(req, res, next) {
           Assumption: if we get a result we will take the coordinates from the first result returned
         */
 
-        
+        req.results = JSONResponse.results[0].geometry;
 
+        //console.log(JSONResponse);
 
-        //  req.results = stores your coordinates
         next();
     });
   } else {
